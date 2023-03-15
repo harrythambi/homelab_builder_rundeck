@@ -1,0 +1,76 @@
+- defaultTab: nodes
+  description: Add Workload Domain to Existing Management Domain
+  executionEnabled: true
+  id: 8da67f77-adac-465e-a3e0-ce87618b34fc
+  loglevel: INFO
+  name: Add Workload Domain to Existing Management Domain - Manual
+  nodeFilterEditable: false
+  options:
+  - description: 'DNS Server 1 would be pointing to your existing Windows AD DNS Server,
+      this value is for an additional fall back DNS Server such as a home router.  '
+    label: Additional DNS Server 2
+    name: dns_server_2
+    value: 192.168.0.1
+  - hidden: true
+    label: management_pod_generate_inventory
+    name: management_pod_generate_inventory
+    value: 'false'
+  - label: Default Target Datastore
+    name: default_target_datastore
+    required: true
+  - hidden: true
+    label: management_pod_generate_networks
+    name: management_pod_generate_networks
+    value: 'false'
+  - label: Target Windows Admin Server Hostname
+    name: management_pod_winadmin_server_hostname
+    value: mp-winadm01.harrythambi.cloud
+  - label: Target Windows Admin Server IP
+    name: management_pod_winadmin_server_ip
+    value: 10.20.0.10
+  - description: The current Domain Name which your exisitng Windows AD Server belongs
+      to.
+    label: Domain Name
+    name: pods_domain_name
+    value: harrythambi.cloud
+  - label: Deployment MTU value
+    name: pods_mtu
+    value: '9000'
+  - description: An available /16 to be consumed by the auto network creation for
+      the workload domains.
+    label: Workload Domain /16
+    name: pods_network_16
+    value: 10.2.0.0/16
+  - label: Default Password for Deployment
+    name: pods_password
+    value: VMware1!VMware1!
+  - label: Time Server 1
+    name: time_server_1
+    value: 0.uk.pool.ntp.org
+  - label: Time Server 2
+    name: time_server_2
+    value: 1.uk.pool.ntp.org
+  - label: Time Zone
+    name: time_zone
+    value: GMT Standard Time
+  - description: '# Heading level 1'
+    enforced: true
+    label: '------------'
+    name: Section1
+    value: '-----------------------------------------'
+    values:
+    - '-----------------------------------------'
+    valuesListDelimiter: ','
+  plugins:
+    ExecutionLifecycle: null
+  scheduleEnabled: true
+  sequence:
+    commands:
+    - configuration:
+        command: docker images
+      description: list docker images
+      nodeStep: true
+      type: localexec
+    keepgoing: false
+    strategy: node-first
+  uuid: 8da67f77-adac-465e-a3e0-ce87618b34fc
