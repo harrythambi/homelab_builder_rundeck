@@ -1,0 +1,150 @@
+- defaultTab: output
+  description: Add Workload Domain to Existing Management Domain using a YAML file
+  executionEnabled: true
+  id: 27e0f720-ec28-4455-a2ab-16edebd2c743
+  loglevel: INFO
+  multipleExecutions: true
+  name: Add Workload Domain to Existing Management Domain - YAML - Basic
+  nodeFilterEditable: false
+  options:
+  - label: Lab Prefix
+    name: lab_prefix
+    description: "    Example: lab, pod, site\n\
+      \    The 'Lab Prefix' will be concatenated with the 'Lab Number' for your overall 'Lab Name'.\n\
+      \    Example: lab1, lab2, pod3, site4.\n\      
+      \    "
+    required: true
+  - label: Lab Number
+    name: lab_number
+    description: "    Example: 1, 2, 3, 4\n\
+      \    Ensure the number is always unique, as this will be used to calculate the deployment networking using the provided \\16 subnet. \n\
+      \    The 'Lab Number' will be concatenated with the 'Lab Prefix' for your overall 'Lab Name'.\n\
+      \    Example: lab1, lab2, pod3, site4.\n\
+      \    "
+    required: true
+  - label: Target Datastore Name
+    name: target_datastore_name
+    description: "    The name for the target datastore for which you would like the lab to be deployed to.\n\
+      \    "
+    required: true
+  - label: Workload Domain vyOS (ToR) Porgroup
+    name: workload_vyos_portgroup
+    description: "    Provide the management porgroup already reachable and present on your network and in the management domain for the vyOS ToRs.\n\
+      \    "
+    required: true
+  - label: Workload Domain vyOS (ToR) Network
+    name: workload_vyos_network_cidr
+    description: "    Provide the management network cidr already reachable and present on your network and in the management domain for the vyOS ToRs.\n\
+      \    "
+    required: true    
+  - label: Workload Domain vyOS (ToR) VIP
+    name: workload_vyos_vip
+    description: "    Provide an available IP for the Lab vyOS (ToR) VIP.\n\
+      \    "
+    required: true
+  - label: Workload Domain vyOS (ToR) 1 IP
+    name: workload_vyos_1_ip
+    description: "    Provide an available IP for the Lab vyOS (ToR) 1 IP.\n\
+      \    "
+    required: true
+  - label: Workload Domain vyOS (ToR) 2 IP
+    name: workload_vyos_2_ip
+    description: "    Provide an available IP for the Lab vyOS (ToR) 2 IP.\n\
+      \    "
+    required: true
+  - label: Playbook Tags
+    name: playbook_tags
+    description: "    Optional playbook ansible tags to run certain tasks only from the playbook.\n\
+      \    "
+    delimiter: ','
+    multivalued: true
+    value: all
+  - label: Lab JSON File
+    name: lab_json
+    description: "    Template can be found [HERE](https://github.com/harrythambi/homelab_builder/blob/main/template_pod_inputs_lab_deploy_existing_mgmt.yaml)\n\
+      \    Check out the [README](https://github.com/harrythambi/homelab_builder/blob/main/pod_inputs_readme.md) for examples and comments for each parameter. \n\
+      \    "
+    required: true
+    type: file
+  plugins:
+    ExecutionLifecycle: null
+  scheduleEnabled: true
+  sequence:
+    commands:
+    - description: Copy YAML file to Container
+      exec: cp ${file.lab_json} /docker/files/${option.lab_prefix}${option.lab_number}_pod_inputs.yaml   
+    - description: Replace values in file
+      configuration:
+        command: >-
+          sed -i 's/workload_pod_name_prefix.*/workload_pod_name_prefix: ${option.lab_prefix}/g' /docker/files/${option.lab_prefix}${option.lab_number}_pod_inputs.yaml
+      nodeStep: true
+      type: localexec
+    - description: Replace values in file 1
+      configuration:
+        command: >-
+          sed -i 's/workload_pod_number.*/workload_pod_number: ${option.lab_number}/g' /docker/files/${option.lab_prefix}${option.lab_number}_pod_inputs.yaml
+      nodeStep: true
+      type: localexec
+    - description: Replace values in file 2
+      configuration:
+        command: >-
+          sed -i 's/workload_pod_target_datastore.*/workload_pod_target_datastore: ${option.target_datastore_name}/g' /docker/files/${option.lab_prefix}${option.lab_number}_pod_inputs.yaml
+      nodeStep: true
+      type: localexec
+    - description: Replace values in file 3
+      configuration:
+        command: >-
+          sed -i 's/workload_pod_esxi_server_target_datastore.*/workload_pod_esxi_server_target_datastore: ${option.target_datastore_name}/g' /docker/files/${option.lab_prefix}${option.lab_number}_pod_inputs.yaml
+      nodeStep: true
+      type: localexec
+    - description: Replace values in file 4
+      configuration:
+        command: >-
+          sed -i 's/workload_pod_vcenter_vsan_cache_disk_target_datastore.*/workload_pod_vcenter_vsan_cache_disk_target_datastore: ${option.target_datastore_name}/g' /docker/files/${option.lab_prefix}${option.lab_number}_pod_inputs.yaml
+      nodeStep: true
+      type: localexec
+    - description: Replace values in file 5
+      configuration:
+        command: >-
+          sed -i 's/workload_pod_vcenter_vsan_capacity_disk_target_datastore.*/workload_pod_vcenter_vsan_capacity_disk_target_datastore: ${option.target_datastore_name}/g' /docker/files/${option.lab_prefix}${option.lab_number}_pod_inputs.yaml
+      nodeStep: true
+      type: localexec
+    - description: Replace values in file 6
+      configuration:
+        command: >-
+          sed -i 's/workload_pod_vyos_router_mgmt_portgroup_name.*/workload_pod_vyos_router_mgmt_portgroup_name: ${option.workload_vyos_portgroup}/g' /docker/files/${option.lab_prefix}${option.lab_number}_pod_inputs.yaml
+      nodeStep: true
+      type: localexec      
+    - description: Replace values in file 7
+      configuration:
+        command: >-
+          sed -i 's#workload_pod_vyos_router_mgmt_portgroup_network_cidr.*#workload_pod_vyos_router_mgmt_portgroup_network_cidr: ${option.workload_vyos_network_cidr}#g' /docker/files/${option.lab_prefix}${option.lab_number}_pod_inputs.yaml
+      nodeStep: true
+      type: localexec
+    - description: Replace values in file 8
+      configuration:
+        command: >-
+          sed -i 's/workload_pod_vyos_router_mgmt_portgroup_vip.*/workload_pod_vyos_router_mgmt_portgroup_vip: ${option.workload_vyos_vip}/g' /docker/files/${option.lab_prefix}${option.lab_number}_pod_inputs.yaml
+      nodeStep: true
+      type: localexec
+    - description: Replace values in file 9
+      configuration:
+        command: >-
+          sed -i 's/workload_pod_vyos_router_1_mgmt_portgroup_ip1.*/workload_pod_vyos_router_1_mgmt_portgroup_ip1: ${option.workload_vyos_1_ip}/g' /docker/files/${option.lab_prefix}${option.lab_number}_pod_inputs.yaml
+      nodeStep: true
+      type: localexec
+    - description: Replace values in file 10
+      configuration:
+        command: >-
+          sed -i 's/workload_pod_vyos_router_2_mgmt_portgroup_ip2.*/workload_pod_vyos_router_2_mgmt_portgroup_ip2: ${option.workload_vyos_2_ip}/g' /docker/files/${option.lab_prefix}${option.lab_number}_pod_inputs.yaml
+      nodeStep: true
+      type: localexec
+    - description: Docker Run Ansible Playbook
+      exec: docker run --privileged --rm -v /docker/files:/mnt/files harrythambi/homelab_builder_ansible:0.1
+        python3 /opt/homelab_builder/run_playbook.py --pod-name ${option.lab_prefix}${option.lab_number}
+        --pod-inputs-file /mnt/files/${option.lab_prefix}${option.lab_number}_pod_inputs.yaml --create-inventory
+        --run-ansible --playbook /opt/homelab_builder/deploy_workload_pod_vsan.yaml
+        --playbook-tags ${option.playbook_tags}
+    keepgoing: false
+    strategy: node-first
+  uuid: 27e0f720-ec28-4455-a2ab-16edebd2c743
