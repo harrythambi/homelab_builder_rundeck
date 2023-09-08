@@ -1,0 +1,63 @@
+- defaultTab: output
+  description: Add Workload Domain
+  executionEnabled: true
+  id: 82a3a350-dc24-436d-bb70-8d5b56f450cd
+  loglevel: INFO
+  multipleExecutions: true
+  name: Add Workload Domain
+  nodeFilterEditable: false
+  options:
+  - description: "    Example: lab, pod, site\n    The 'Lab Prefix' will be concatenated\
+      \ with the 'Lab Number' for your overall 'Lab Name'.\n    Example: lab1, lab2,\
+      \ pod3, site4.\n      "
+    label: Lab Name
+    name: lab_name
+    required: true
+  - delimiter: ','
+    description: "    Optional playbook ansible tags to run certain tasks only from\
+      \ the playbook.\n    "
+    label: Playbook Tags
+    multivalued: true
+    name: playbook_tags
+    value: all
+  - description: "    Template can be found [HERE](https://github.com/harrythambi/homelab_builder/blob/main/template_pod_inputs_lab_deploy_existing_mgmt.yaml)\n\
+      \    Check out the [README](https://github.com/harrythambi/homelab_builder/blob/main/pod_inputs_readme.md)\
+      \ for examples and comments for each parameter. \n    "
+    label: Lab YAML Inputs File
+    name: lab_yaml
+    type: file
+  - enforced: true
+    label: Create Inventory
+    name: create_inventory
+    required: true
+    value: --no-create-inventory
+    values:
+    - --create-inventory
+    - --no-create-inventory
+    valuesListDelimiter: ','
+  - enforced: true
+    label: Run Ansible
+    name: run_ansible
+    required: true
+    value: --run-ansible
+    values:
+    - --no-run-ansible
+    - --run-ansible
+    valuesListDelimiter: /
+  plugins:
+    ExecutionLifecycle: null
+  scheduleEnabled: true
+  sequence:
+    commands:
+    - description: Copy YAML file to Container
+      exec: cp ${file.lab_yaml} /docker/files/${option.lab_name}_pod_inputs.yaml
+    - description: Docker Run Ansible Playbook
+      exec: docker run --privileged --tty --rm -v /docker/files:/mnt/files --env ANSIBLE_CONFIG=/opt/homelab_builder/ansible.cfg
+        harrythambi/homelab_builder_ansible:0.6 python3 /opt/homelab_builder/hlb.py
+        --pod-name ${option.lab_name} ${option.create_inventory} --pod-inputs-file
+        /mnt/files/${option.lab_name}_pod_inputs.yaml ${option.run_ansible} --playbook
+        /opt/homelab_builder/playbooks/deploy_workload_domain.yaml --playbook-tags
+        ${option.playbook_tags}
+    keepgoing: false
+    strategy: node-first
+  uuid: 82a3a350-dc24-436d-bb70-8d5b56f450cd
